@@ -1,0 +1,18 @@
+/usr/local/lib/python2.7/dist-packages/flask_sqlalchemy/__init__.py:800: UserWarning: SQLALCHEMY_TRACK_MODIFICATIONS adds significant overhead and will be disabled by default in the future.  Set it to True to suppress this warning.
+  warnings.warn('SQLALCHEMY_TRACK_MODIFICATIONS adds significant overhead and will be disabled by default in the future.  Set it to True to suppress this warning.')
+ * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+ * Restarting with stat
+Traceback (most recent call last):
+  File "run.py", line 2, in <module>
+    from app import app
+  File "/home/cvcadmin/software/api-rest-python-edgar-project/app/__init__.py", line 3, in <module>
+    from flask_bootstrap import Bootstrap
+  File "/usr/local/lib/python2.7/dist-packages/flask_bootstrap/__init__.py", line 9, in <module>
+    from wtforms.fields import HiddenField
+  File "/usr/local/lib/python2.7/dist-packages/wtforms/__init__.py", line 12, in <module>
+    from wtforms.fields import *
+  File "/usr/local/lib/python2.7/dist-packages/wtforms/fields/__init__.py", line 3, in <module>
+    from wtforms.fields.simple import *
+  File "/usr/local/lib/python2.7/dist-packages/wtforms/fields/simple.py", line 13, in <module>
+    class TextField(StringField):
+KeyboardInterrupt
