@@ -22,8 +22,6 @@ app = Flask(__name__, static_folder="./dist/static", template_folder="./dist")
 # Configure CORS feature
 cors = CORS(app, resources={r"/api/*": {"origins": '*'}})
 app.config['CORS_HEADER'] = 'Content-Type'
-import ipdb
-ipdb.set_trace()
 
 import glob
 for img_path in glob.iglob(DIRECTORY_IMAGES+os.sep+"*.jpg"):
