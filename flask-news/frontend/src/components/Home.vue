@@ -9,23 +9,21 @@
         </div>
         
         <div class="input-group">
-            <div v-if="allMessages">
+            <div v-if="results">
                 <hr>
-                <!--
-                <div class="msg-group p-2" v-for="message in allMessages">
+                <div class="msg-group p-2" v-for="result in results">
                         <div class="card">
                         <div class="card-header">
-                            Quote
+				{{ result._source.title }}
                         </div>
                         <div class="card-body">
                             <blockquote class="blockquote mb-0">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
-                            <footer class="blockquote-footer">Someone famous in <cite title="Source Title">Source Title</cite></footer>
+				    <p>{{ result._source.summary }}</p>
+				    <footer class="blockquote-footer"> {{ result._source.timestamp  }} extracted from: <a v-bind:href="result._source.url"><cite title="Source Title">link</cite></a></footer>
                             </blockquote>
                         </div>
                         </div>
                 </div>
-                -->
             </div> 
         </div>               
     </div>
@@ -44,18 +42,18 @@ export default {
     data () {
         return {
             currentTags: '',
-            data: [] 
+            results: [] 
         }
     },
     
     methods:
      {
         search( ) {
-        const path = 'http://0.0.0.0:5001/api/news';
+        const path = 'http://0.0.0.0:5002/api/news';
         axios
-          .get(path, {"tags" : this.currentTags.split(" ")})
+	.get(path, {params: {"tags" : this.currentTags.split(" ")}})
           .then(response => {
-                this.data = response.data;
+                this.results = response.data['results'];
          })
           .catch(error => {
             console.log(error);

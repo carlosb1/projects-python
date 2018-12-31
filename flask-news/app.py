@@ -9,6 +9,7 @@ from pymongo import MongoClient
 from newspaper import Article
 import newspaper
 from celery import Celery
+import logging
 
 
 class ElasticSearchIndexer:
@@ -47,6 +48,7 @@ def get_collection(host, port):
     news = db['news']
     return news
 
+factory_responses = FactoryResponse()
 USED_LANGUAGE = 'es'
 CELERY_BROKER_ADDRESS = 'redis://localhost'
 
@@ -58,31 +60,34 @@ celery = Celery('tasks', broker=CELERY_BROKER_ADDRESS)
 # Configure CORS feature
 cors = CORS(app, resources={r"/api/*": {"origins": '*'}})
 app.config['CORS_HEADER'] = 'Content-Type'
+logger = logging.getLogger(__name__)
 
 
 @app.route('/api/news', methods=['GET'])
 @cross_origin(origin='*')
 def get_news():
-    content = request.json
-    tags = content['tags']
-    query = {'query': {'match': tags}}
+    tags = request.args.getlist('tags[]')
+    query = {'query': {'terms': {'keywords': tags}}}
+    logger.info("Query to elastic search: " + str(query))
     # response = {'text_response': 'hello world'}
     results = elastic_searcher.search('new', query)
-    return jsonify(results)
+    hits = results['hits']['hits']
+    return jsonify({'results': hits})
 
 
 @app.route('/api/news', methods=['POST'])
 @cross_origin(origin='*')
 def post_news():
     content = request.json
+    list_ids = []
     if 'urls' not in content or len(content['urls']) == 0:
-        return FactoryResponse.new400()
+        return factory_responses.new400()
     try:
-        analyse_urls(content['urls'])
+        list_ids = analyse_urls(content['urls'])
     except:
-        return FactoryResponse.new500()
+        return factory_responses.new500()
 
-    return FactoryResponse.new201()
+    return factory_responses.new201({'ids': list_ids})
 
 
 @app.route('/', defaults={'path': ''})
@@ -94,8 +99,8 @@ def catch_all(path):
 
 
 @celery.task
-def run_batch(elastic_searcher, news, database_id, url):
-        print("Executing analysed batch task")
+def run_batch(database_id, url):
+        logger.info("Executing analysed batch task")
         article = Article(url, language=USED_LANGUAGE)
         article.download()
         article.parse()
@@ -111,32 +116,30 @@ def run_batch(elastic_searcher, news, database_id, url):
         # parse correctly doc tags
         doc = dict_from_class(article, ELASTIC_KEYS, included=True)
         doc['tags'] = list(doc['tags'])
-        print("Inserting url: " + doc['url'])
+        logger.info("Inserting url: " + doc['url'])
         doc['db_id'] = database_id
         doc['timestamp'] = datetime.now()
-        news.update(db_news, upsert=True)
+        news.update({'url': url}, {"$set": db_news})
         elastic_searcher.index('new', doc)
 
 
 def analyse_urls(urls):
     # we add to database
+    list_ids = []
     for url in urls:
         if not news.find_one({'url': url}):
             database_id = str(news.insert_one({'url': url}).inserted_id)
             # run_batch(elastic_searcher, news, database_id, url)
-            run_batch.apply_async((elastic_searcher, news, database_id, url))
+            run_batch.apply_async((database_id, url))
+            list_ids.append(database_id)
 
+    return list_ids
 
 if __name__ == '__main__':
     host = '0.0.0.0'
-    port = 5001
+    port = 5002
     debug = False
     celery_argvs = ['worker', '--loglevel=DEBUG']
-    # urls = []
-    # url = 'https://www.lavanguardia.com/politica/20181217/453605810080/datos-marcaron-politica-2018.html'
-    # urls.append(url)
-    # analyse_urls(urls)
-
     import threading
     celery_thread = threading.Thread(target=celery.worker_main, args=[celery_argvs])
     celery_thread.start()

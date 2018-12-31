@@ -5,7 +5,7 @@
             <label class="h6" for="basic-url">URL to analyse</label>
             <div class="input-group mb-3">
             <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon3">HTTP://</span>
+                <span class="input-group-text" id="basic-addon3">URL: </span>
             </div>
             <input v-model="currentURL" type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
             </div>
@@ -34,7 +34,7 @@ export default {
         addURL: function() {
             this.URLs = []
             this.URLs.push(this.currentURL)       
-            const path = 'http://0.0.0.0:5001/api/news';
+            const path = 'http://0.0.0.0:5002/api/news';
             axios
             .post(path, {
                     "urls": this.URLs,
