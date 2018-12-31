@@ -140,4 +140,5 @@ if __name__ == '__main__':
     import threading
     celery_thread = threading.Thread(target=celery.worker_main, args=[celery_argvs])
     celery_thread.start()
+    print("Running API REST")
     app.run(host=host, port=port, debug=debug)
