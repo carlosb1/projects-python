@@ -8,4 +8,4 @@ curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_all/_setti
  docker run -d -p 27017:27017 -v /home/carlosb/data:/data/db mongo
  
  # redis to set up batch tasks
-docker run --name some-redis -d redis
+docker run -p 6379:6379 -name some-redis -d redis
