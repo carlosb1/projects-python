@@ -26,7 +26,7 @@ class ElasticSearchIndexer:
         return self.es.get(index=self.index_name, doc_type=doc_type, id=_id)
 
     def search(self, doc_type, body):
-        return self.es.search(index=self.index_name, doc_type=doc_type, body=body)
+        return self.es.search(index=self.index_name, body=body)
 
 
 EXCLUDED_KEYS = ['config', 'extractor', 'html', 'article_html', 'meta_favicon', 'meta_data', 'top_node', 'clean_top_node', 'doc', 'clean_doc']
@@ -134,6 +134,7 @@ def analyse_urls(urls):
             list_ids.append(database_id)
 
     return list_ids
+
 
 if __name__ == '__main__':
     host = '0.0.0.0'
