@@ -16,6 +16,6 @@ RUN apt-get -y update && \
     cd /code && \
     rm -rf frontend/node_modules && \
     cd frontend && npm install && cd .. && \
-    pip install -r backend/requirements.txt    
+    pip install -r requirements.txt    
 CMD ./run.sh
 CMD while true; do sleep 1000; done;
