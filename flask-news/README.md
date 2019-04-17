@@ -9,3 +9,8 @@ curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_all/_setti
  
  # redis to set up batch tasks
 docker run -p 6379:6379 -name some-redis -d redis
+
+# Setting up nltk
+  >>> import nltk
+  >>> nltk.download('punkt')
+
