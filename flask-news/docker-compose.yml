@@ -1,0 +1,41 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+     - "5000:5000"
+  redis:
+    image: "redis:alpine"
+    ports:
+     - 6379:6379
+
+  mongodb:
+    image: mongo:latest
+    container_name: "mongodb"
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - ./data/db:/data/db
+    ports:
+        - 27017:27017
+    command: mongod --smallfiles --logpath=/dev/null # --quiet
+
+  elasticsearch:
+    image: elasticsearch:6.7.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - docker_elk
+  kibana:
+    image: kibana:6.7.1
+    ports:
+      - "5601:5601"
+    links:
+      - elasticsearch
+    networks:
+      - docker_elk
+networks:
+  docker_elk:
+    driver: bridge
