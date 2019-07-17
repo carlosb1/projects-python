@@ -4,10 +4,13 @@ services:
     build: .
     ports:
      - "5000:5000"
+    networks:
+     - back-tier
   redis:
-    image: "redis:alpine"
-    ports:
-     - 6379:6379
+    image: "redis"
+    ports: ["6379"]
+    networks:
+      - back-tier
 
   mongodb:
     image: mongo:latest
@@ -39,3 +42,4 @@ services:
 networks:
   docker_elk:
     driver: bridge
+  back-tier:

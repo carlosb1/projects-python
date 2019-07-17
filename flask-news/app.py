@@ -50,7 +50,7 @@ def get_collection(host, port):
 
 factory_responses = FactoryResponse()
 USED_LANGUAGE = 'es'
-CELERY_BROKER_ADDRESS = 'redis://localhost'
+CELERY_BROKER_ADDRESS = 'redis://redis:6379/0'
 
 news = get_collection('localhost', 27017)
 elastic_searcher = ElasticSearchIndexer('news')
@@ -94,7 +94,7 @@ def post_news():
 @app.route('/<path:path>')
 def catch_all(path):
     if app.debug:
-        return requests.get('http://localhost:8080/{}'.format(path)).text
+        return requests.get('http://0.0.0.0:8080/{}'.format(path)).text
     return render_template("index.html")
 
 
