@@ -1,10 +1,21 @@
 from typing import Optional
 from fastapi import FastAPI, File, UploadFile
+from abc import ABC
 
 import torch
 import kornia
 
 app = FastAPI()
+
+
+class Command(ABC):
+    def name(self):
+        pass
+
+
+class CommandHandler(ABC):
+    def execute(self, command):
+        pass
 
 
 class KorniaController:
