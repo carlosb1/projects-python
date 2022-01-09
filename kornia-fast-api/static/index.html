@@ -5,27 +5,59 @@
     </head>
     <body>
         <h1>WebSocket Chat</h1>
-        <form action="" onsubmit="sendMessage(event)">
-            <input type="text" id="messageText" autocomplete="off"/>
-            <button>Send</button>
-        </form>
-        <ul id='messages'>
-        </ul>
+	<input type="file" id="inp">
+	<canvas id="myCanvas" width="800" height="600"></canvas>
+
         <script>
-            var ws = new WebSocket("ws://localhost:8000/ws");
-            ws.onmessage = function(event) {
-                var messages = document.getElementById('messages')
-                var message = document.createElement('li')
-                var content = document.createTextNode(event.data)
-                message.appendChild(content)
-                messages.appendChild(message)
-            };
-            function sendMessage(event) {
-                var input = document.getElementById("messageText")
-                ws.send(input.value)
-                input.value = ''
-                event.preventDefault()
-            }
+	    document.getElementById('inp').onchange = function(e) {
+	      var img = new Image();
+	      img.onload = draw;
+	      img.onerror = failed;
+	      img.src = URL.createObjectURL(this.files[0]);
+	    };
+
+	    var ws = new WebSocket("ws://localhost:8000/ws");
+            ws.binaryType = "arraybuffer";
+
+
+	ws.onmessage = function(event) {
+	      console.log("[message] Data received from server:");
+	    const arrayBuffer = event.data;
+	    var canvas = document.getElementById('myCanvas');
+	    var ctx = canvas.getContext('2d');
+	    var img = new Image();
+            img.onload = function() {
+		canvas.width = img.width;
+		canvas.height = img.height;
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+	    }
+	    img.src = 'data:image/jpg;base64,' + arrayBuffer;
+	    console.log("size= "+ arrayBuffer.length);
+           };
+
+	/* Functions to load images */
+	    function draw() {
+	      var canvas = document.getElementById('myCanvas');
+	      canvas.width = this.width;
+	      canvas.height = this.height;
+	      var ctx = canvas.getContext('2d');
+	      ctx.drawImage(this, 0,0);
+	    }
+	    function failed() {
+	      console.error("The provided file couldn't be loaded as an Image media");
+	    }
+
+	/* Check  */
+        // returns true if every pixel's uint32 representation is 0 (or "blank")
+	function isCanvasBlank(canvas) {
+	  const context = canvas.getContext('2d');
+
+	  const pixelBuffer = new Uint32Array(
+	    context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+	  );
+
+	  return !pixelBuffer.some(color => color !== 0);
+	}
         </script>
     </body>
 </html>
