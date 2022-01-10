@@ -1,19 +1,30 @@
-from fastapi import WebSocket
-from typing import Optional, List
-from fastapi import FastAPI, File, UploadFile
+"""Main entrypoint function."""
+from typing import List
 from pathlib import Path
-from fastapi.staticfiles import StaticFiles
-from abc import ABC
-import numpy as np
-import cv2
-import kornia as K
-import torch
-import base64
 
-app = FastAPI()
-app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+from fastapi import WebSocket
+from fastapi import FastAPI, File
+from fastapi.staticfiles import StaticFiles
+
+import torch
+import cv2
+import base64
+import uvicorn
+import numpy as np
+import kornia as K
+
+
+# TODO add loggers
+
 
 FILE_PATH = Path('image.jpg')
+
+
+def image_to_base64(img: np.ndarray) -> bytes:
+    """ Given a numpy 2D array, returns a JPEG image in base64 format """
+    # using opencv 2, there are others ways
+    _, img_buffer = cv2.imencode('.jpg', img)
+    return base64.b64encode(img_buffer).decode('utf-8')
 
 
 def create_target_file_path(file_path: Path, count: int):
@@ -34,19 +45,14 @@ class Controller:
 
 controller = Controller()
 
+app = FastAPI()
+app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+
 
 @ app.post("/files/")
 async def create_files(files: List[bytes] = File(...)):
     controller.save_files(files, FILE_PATH)
     return {"file_sizes": [len(file) for file in files]}
-
-
-def image_to_base64(img: np.ndarray) -> bytes:
-    """ Given a numpy 2D array, returns a JPEG image in base64 format """
-
-    # using opencv 2, there are others ways
-    _, img_buffer = cv2.imencode('.jpg', img)
-    return base64.b64encode(img_buffer).decode('utf-8')
 
 
 @app.websocket("/ws")
@@ -68,3 +74,11 @@ async def websocket_endpoint(websocket: WebSocket):
         print(e)
     finally:
         websocket.close()
+
+
+def run():
+    uvicorn.run(app="kornia_api.main:app")
+
+
+if __name__ == '__main__':
+    run()
