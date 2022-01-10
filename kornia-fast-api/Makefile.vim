@@ -1,4 +1,4 @@
 .PHONE: test
 
 test:
-	uvicorn main:app --reload
+	uvicorn kornia_api.main:app --reload
